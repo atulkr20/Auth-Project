@@ -1,3 +1,5 @@
+const { createPostSchema } = require("../middlewares/validator");
+
 exports.getPosts = async (req, res) => {
     const {page} = req.query;
     const postsPerPage = 10;
@@ -26,3 +28,28 @@ exports.getPosts = async (req, res) => {
         console.log(error);
     }
 };
+
+exports.createPost = async(req, res) => {
+    const { title, description} = req.body;
+    const {userId} = req.user;
+    
+    try {
+        const { error, value } = createPostSchema.validate({
+            title,
+            description,
+            userId,
+        });
+        if(error) {
+            return res
+            .status(401)
+            .json({ success: false, message: error.details[0].message});
+
+        }
+        const result = await post.Create({
+            title, description, userId,
+        })
+        res.status(201).json({ success: true, message: 'created', data: result});
+    } catch (error) {
+        console.log(error);
+    }
+}
